@@ -1,15 +1,14 @@
-import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 import time
 from dataclasses import dataclass
-from typing import List
+
 
 @dataclass
 class fragrance:
     site : str
     price : int
-    ml : str
+    ml : int
 
 
 def button_tap(driver):
@@ -20,8 +19,7 @@ def button_tap(driver):
     except:
         pass
 
-def search_item(driver):
-    fragrance = "azzaro most wanted"
+def search_item(driver, fragrance):
     try:
         space_bar = driver.find_element(By.XPATH, '//*[@id="APjFqb"]')
         time.sleep(2)
@@ -47,44 +45,23 @@ def crawl_prices_and_sites(driver, frg_list):
             
             price = item_price.split(",")
             price = int(price[0])
+
+            try:
+                site = item_site.split(".")
+                item_site = site[0]
+            except:
+                pass
             
             name_words = item_ml.split()
-            ml = ' '
+            ml = 0
             for word in name_words:
                 try:
                     ml = int(word)
                 except:
                     pass
 
-            if ml == ' ':
-                ml = '-'
 
             frg_list.append(fragrance(item_site, price, ml))
         except:
             pass
 
-
-legit_sites = ['Notino', 'Sephora', 'Deluxury', 'Hiris', 'Vivantis', 'Obsentum',
-               'Parfimo', 'Parfumss', 'Brasty', 'Koku', 'Zivada', 'Makeup', 'Evero']
-
-# Setup undetected Chrome
-options = uc.ChromeOptions()
-options.add_argument("--disable-blink-features=AutomationControlled")
-# Optional: options.add_argument('--headless')  # for headless mode
-
-# You do NOT need to provide a chromedriver path — uc manages that
-try:
-    with uc.Chrome(use_subprocess=True) as driver:
-        # Open Google Shopping
-        url = "https://www.google.com"
-        driver.get(url)
-
-        button_tap(driver)
-        search_item(driver)
-        frg_list : List[fragrance] = []
-        crawl_prices_and_sites(driver, frg_list)
-
-        for item in frg_list:
-            print(item.site, item.price, item.ml, sep=' ')
-except Exception as e:
-    print(f"An error occurred: {e}")
