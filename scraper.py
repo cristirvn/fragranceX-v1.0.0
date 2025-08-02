@@ -9,6 +9,7 @@ class fragrance:
     site : str
     price : int
     ml : int
+    url : str
 
 
 def button_tap(driver):
@@ -19,11 +20,13 @@ def button_tap(driver):
     except:
         pass
 
-def search_item(driver, fragrance):
+def search_item(driver, fragrance, type, ml):
     try:
+        ml = str(ml)
+        frg = fragrance + ' ' + type + ' ' + ml + ' ' + 'ml'
         space_bar = driver.find_element(By.XPATH, '//*[@id="APjFqb"]')
         time.sleep(2)
-        space_bar.send_keys(fragrance)
+        space_bar.send_keys(frg)
         space_bar.send_keys(Keys.RETURN)
         time.sleep(3)
     except:
@@ -42,7 +45,8 @@ def crawl_prices_and_sites(driver, frg_list):
             item_price = item.find_element(By.CSS_SELECTOR, '.T4OwTb .e10twf').text
             item_site = item.find_element(By.CSS_SELECTOR, '.LbUacb .zPEcBd').text
             item_ml = item.find_element(By.CSS_SELECTOR, '.pla-unit-title-link').text
-            
+            item_link = item.find_element(By.CSS_SELECTOR, '.pla-unit-title-link').get_attribute('href')
+
             price = item_price.split(",")
             price = int(price[0])
 
@@ -61,7 +65,7 @@ def crawl_prices_and_sites(driver, frg_list):
                     pass
 
 
-            frg_list.append(fragrance(item_site, price, ml))
+            frg_list.append(fragrance(item_site, price, ml, item_link))
         except:
             pass
 
