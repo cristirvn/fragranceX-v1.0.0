@@ -8,6 +8,8 @@ from pydantic import BaseModel
 # Data model for the request body
 class FragranceRequest(BaseModel):
     name: str
+    type : str
+    ml : int
 
 legit_sites = ['Notino', 'Sephora', 'Deluxury', 'Hiris', 'Vivantis', 'Obsentum',
                'Parfimo', 'Parfumss', 'Brasty', 'Koku', 'Zivada', 'Makeup', 'Evero']
@@ -41,7 +43,7 @@ async def get_best_price(request: FragranceRequest):
     driver.get(url)
 
     button_tap(driver)
-    search_item(driver, request.name)
+    search_item(driver, request.name, request.type, request.ml)
     frg_list : List[fragrance] = []
 
     crawl_prices_and_sites(driver, frg_list)
@@ -49,7 +51,7 @@ async def get_best_price(request: FragranceRequest):
     driver.quit()
 
     frg_list = [item for item in frg_list if item.site in legit_sites]
-    frg_list = [item for item in frg_list if item.ml >= 100]
+    frg_list = [item for item in frg_list if item.ml == request.ml]
 
     final_result = 0
     predefined_price = 10000000000
@@ -58,6 +60,6 @@ async def get_best_price(request: FragranceRequest):
             final_result = item
             predefined_price = item.price
     if final_result:
-            return {"price": final_result.price, "site": final_result.site, "ml": final_result.ml}
+            return {"price": final_result.price, "site": final_result.site, "ml": final_result.ml, "url": final_result.url}
     else:
             return {"message": "No results found."}
